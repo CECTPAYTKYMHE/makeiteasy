@@ -1,0 +1,24 @@
+﻿{% extends "main/base.html" %}
+{% block message %}
+{% endblock message %}
+{% block content %}
+<div class="col-md-8 mx-auto vh-100 d-flex flex-column justify-content-center align-items-center">
+    <div class="d-grid gap-2 d-md-block">
+        {% if user.is_authenticated %}
+        <a href="{% url 'users:profile' %}" class="link-dark"><button class="btn btn-dark" type="button">В Профиль</button></a>
+        {% endif %}
+        <a href="{{back}}"><button class="btn btn-primary" type="button">Назад</button></a>
+      </div>
+<div class="list-group">
+    {% for url in urls %}
+    <a href="{{url.url}}" class="my-1 list-group-item list-group-item-action active" aria-current="true">
+      <div class="d-flex w-100 justify-content-between">
+        <h5 class="mb-1">{{url.name}}</h5>
+      </div>
+      <p class="mb-1">Ваш файл готов</p>
+      <small>Нажмите чтобы скачать</small>
+    </a>
+  {% endfor %}
+</div>
+</div>
+{% endblock content %}

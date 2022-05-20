@@ -1,0 +1,20 @@
+﻿{% extends "main/base.html" %}
+{% load static %}
+{% block css %}
+<link href="{% static 'main/css/bootstrap.min.css' %}" rel="stylesheet">
+<link href="{% static 'main/css/offcanvas.css' %}" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'main/css/bootstrap-icons.css' %}">
+{% endblock css %}
+{% block content %}
+<main class="container">
+<div class="my-3 p-3 bg-body rounded shadow-sm">
+<center><h3>Вы действительно хотите удалить {{pdf.name}}?</h3>
+<form method="POST" action="{% url 'users:delete' pdf.pk %}">
+    {% csrf_token %}<button type="submit" class="btn btn-danger">Удалить</button>
+    <a href="{% url 'users:profile_pdf' %}"><button type="button" class="btn btn-primary">Назад</button></a>
+ </form>
+
+</center>
+</div>
+</main>
+{% endblock content %}
