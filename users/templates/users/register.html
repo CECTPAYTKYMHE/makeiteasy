@@ -1,5 +1,6 @@
 ﻿{% extends "main/base.html" %}
 {% block content %}
+
 {% include "main/message.html" %}
 <form action="{% url 'users:register' %}" method="post">
     {% csrf_token %}
@@ -20,9 +21,12 @@
       {{ form.password2 }}
     <label for="{{ form.password2.id_for_label }}">Повторите пароль</label>
   </div>
+  <div class="form my-2">
+  <label for="{{ form.captcha.id_for_label }}" class= 'my-3' ><h6>Введите символы с картинки</h6></label>
+  {{ form.captcha }}
+</div>
   <input class="btn btn-dark my-3" type="submit" value="Зарегистрироваться">
   <h6>Уже есть аккаунт? <a href="{% url 'users:login' %}">Войти</a></h6>
-
 </div>
 </form>
 {% endblock content %}

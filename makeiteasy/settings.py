@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'debug_toolbar',
+    'captcha',
     'pdf.apps.PdfConfig',
     'users.apps.UsersConfig',
 ]
@@ -142,3 +143,5 @@ INTERNAL_IPS = [
 ]
 
 LOGIN_URL = '/users/login/'
+
+CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.random_char_challenge'

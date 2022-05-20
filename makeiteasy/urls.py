@@ -21,10 +21,12 @@ from .views import home
 
 urlpatterns = [
     path('admin/', admin.site.urls, name='adminka'),
+    path('captcha/', include('captcha.urls')),
     path('', home, name='home'),
     path('pdf/', include(('pdf.urls', 'pdf'))),
     path('users/', include(('users.urls', 'users'))),
 ]
+
 
 if settings.DEBUG:
     import debug_toolbar

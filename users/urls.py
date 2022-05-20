@@ -11,3 +11,4 @@ urlpatterns = [
     path('delete/<int:pk>/', PDFDeleteView.as_view(), name='delete'),
     path('chkdelete/', massdelete, name='massdelete'),
 ]
+
