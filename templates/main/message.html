@@ -1,17 +1,9 @@
 ﻿<div class="col-md-4 mx-auto justify-content-center align-items-center">
-{% if messages or form.errors %}
-<div class="alert {% if messages %} alert-success 
-{% else %} alert-warning {% endif %} alert-dismissible fade show " role="alert">
 {% if messages %}
 {% for message in messages %}
+<div class="alert  alert-{{ message.tags }} alert-dismissible fade show " role="alert">
     {{ message }}
     {% endfor %}
-    {% else %}
-    {% for field in form %}
-            {{ field.errors }}
-        {% endfor %}
-    
-    {% endif %}
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 {% endif %}

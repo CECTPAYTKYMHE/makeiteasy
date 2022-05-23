@@ -23,6 +23,8 @@ def login(request):
             if user and user.is_active:
                 auth.login(request, user)
                 return HttpResponseRedirect(reverse('home'))
+        else:
+            messages.warning(request, "Неправильный логин или пароль")
     else:
         form = UserLoginForm()
     context = {
@@ -40,6 +42,9 @@ def register(request):
         if form.is_valid():
             if User.objects.filter(username = request.POST['username']).first():
                 messages.error(request, "Такой пользователь уже существует")
+                return redirect('users:register')
+            elif User.objects.filter(email = request.POST['email']).first():
+                messages.error(request, "Пользователь с такой почтой уже существует")
                 return redirect('users:register')
             else:
                 form.save()
