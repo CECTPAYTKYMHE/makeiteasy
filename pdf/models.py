@@ -1,9 +1,7 @@
 import os
 from django.db import models
-import uuid
-from django.contrib.auth.models import User , AnonymousUser
+from django.contrib.auth.models import User
 from django.dispatch import receiver
-from django.urls import reverse
 
 class Pdf(models.Model):
     """Модель для преобразования PDF в JPG и обратно"""

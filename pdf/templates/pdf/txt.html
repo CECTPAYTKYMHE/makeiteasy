@@ -1,0 +1,15 @@
+﻿{% extends "main/base.html" %}
+{% block content %}
+<form action="{% url 'pdf:txt' %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+<div class="col-md-8 mx-auto vh-100 d-flex flex-column justify-content-center align-items-center">
+    <h5>Из PDF в TXT</h5>
+<div class="input-group mb-3">
+    <span class="input-group-text" id="basic-addon1">Описание</span>
+    {{ form.name }}
+</div>
+    {{ form.pdffile }}
+    <input class="btn btn-dark my-3" type="submit" value="MakeItEasy">
+</div>
+</form>
+{% endblock content %}
