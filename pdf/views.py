@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from makeiteasy.settings import BASE_DIR
-from .forms import PdfForm
+from .forms import PdfForm, TxtForm
 from .models import Pdf
 import os
 from zipfile import ZipFile
@@ -119,8 +119,6 @@ def jpgpdfconverter(jpgrawlst):
     current_date = date.today()
     Path(media + 'jpg/' + str(current_date)).mkdir(parents=True, exist_ok=True)
     jpgzipname = f'jpg/{str(current_date)}/{uuid.uuid4()}.zip'
-    # folder = uuid.uuid4()
-    # os.mkdir(media + f'jpg/temp/{folder}')
     with ZipFile(media + jpgzipname, 'a') as myzip:
         for file in jpgrawlst:
             if 'image' not in file.content_type:
@@ -130,7 +128,6 @@ def jpgpdfconverter(jpgrawlst):
             myzip.writestr(data=file.read(),zinfo_or_arcname=f'{i}.jpg')
             file.close()
             i += 1
-    # shutil.rmtree(media + f'jpg/temp/{folder}')
     myzip.close()
     Path(media + 'pdf/converted/' + str(current_date)).mkdir(parents=True, exist_ok=True)
     pdfname = f'pdf/converted/{str(current_date)}/{uuid.uuid4()}.pdf'
@@ -161,7 +158,7 @@ def pdftotxt(request):
     """View функция для отправки и сохранения PDF файлов(принимает только PDF файлы остальные отбрасывает) с 
     последующим преобразованием и распознованием текста в TXT zip архив"""
     if request.method == 'POST':
-        form = PdfForm(request.POST, request.FILES)
+        form = TxtForm(request.POST, request.FILES)
         if request.POST['name'] != '':
             name = '(PDFtoTXT) ' + request.POST['name']
         else:
@@ -176,7 +173,7 @@ def pdftotxt(request):
                 if afile.content_type != 'application/pdf':
                     continue
                 file_obj = Pdf.objects.create(name=name, pdffile=afile, user = user)
-                Pdf.objects.filter(pk=file_obj.id).update(zipimgfile = pdftotextconverter(afile,'rus'))
+                Pdf.objects.filter(pk=file_obj.id).update(zipimgfile = pdftotextconverter(afile,request.POST['lang']))
                 url = Pdf.objects.get(pk=file_obj.id)
                 jpgziplist.append({'url' : url.zipimgfile.url,
                                    'name': str(url.pdffile).split('/')[-1]})
@@ -186,7 +183,7 @@ def pdftotxt(request):
             }
             return render(request, 'pdf/readyfiles.html', context)
     else:
-        form = PdfForm()
+        form = TxtForm()
     context = {
         'title': 'txt',
         'form': form,

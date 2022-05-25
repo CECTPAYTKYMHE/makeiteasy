@@ -14,11 +14,22 @@ class PdfForm(forms.ModelForm):
     class Meta:
         model = Pdf
         fields = ('name', 'pdffile')
+        
+class TxtForm(forms.ModelForm):
+    CHOICES = [('eng', 'Английский'), ('rus', 'Русский')]
+    """Форма загрузки файлов для модели models.Pdf"""
+    name = forms.CharField(required=False, widget=forms.TextInput(
+        attrs={'class':'form-control',
+               'placeholder': "Для отображения в личном кабинете, не обязательное поле"}))
+    pdffile = forms.FileField(widget=forms.FileInput(
+        attrs={'id': 'formFileMultiple',
+               'class':'form-control',
+               'multiple': True}))
+    lang = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-select'}),choices=CHOICES)
+
+    class Meta:
+        model = Pdf
+        fields = ('name', 'pdffile')
     
-    # def __init__(self, user, *args, **kwargs):
-    #     super(PdfForm, self).__init__(*args, **kwargs)
-    #     if user.is_anonymous:
-    #         self.fields['name'].widget.attrs['disabled'] = True
-    #         self.fields['name'].widget.attrs['placeholder'] = 'Поле не доступно для не авторизованных пользователей'
     
     
