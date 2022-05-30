@@ -1,9 +1,9 @@
 ﻿from django.urls import path
-from .views import jpgtopdf, pdftotxt, Pdftojpg
+from .views import Pdftojpg, Jpgtopdf, Pdftotxt
 
 
 urlpatterns = [
     path('pdftojpg/', Pdftojpg.as_view(), name='pdf'),
-    path('jpgtopdf/', jpgtopdf, name='jpg'),
-    path('pdftotxt/', pdftotxt, name='txt'),
+    path('jpgtopdf/', Jpgtopdf.as_view(), name='jpg'),
+    path('pdftotxt/', Pdftotxt.as_view(), name='txt'),
 ]

@@ -16,8 +16,8 @@ class PdfForm(forms.ModelForm):
         fields = ('name', 'pdffile')
         
 class TxtForm(forms.ModelForm):
-    CHOICES = [('eng', 'Английский'), ('rus', 'Русский')]
     """Форма загрузки файлов для модели models.Pdf"""
+    CHOICES = [('eng', 'Английский'), ('rus', 'Русский')]
     name = forms.CharField(required=False, widget=forms.TextInput(
         attrs={'class':'form-control',
                'placeholder': "Для отображения в личном кабинете, не обязательное поле"}))
