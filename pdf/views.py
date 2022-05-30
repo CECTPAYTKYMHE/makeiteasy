@@ -11,20 +11,32 @@ from pdf2image import convert_from_bytes
 import shutil
 from datetime import date
 from pathlib import Path
+from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.views.generic import DeleteView
 from PIL import Image
 import pytesseract
-from pdf2image import convert_from_path
+from django.views import View
 
 media = os.path.join(BASE_DIR, 'media/')
  
-def pdftojpg(request):
-    """View функция для отправки и сохранения PDF файлов(принимает только PDF файлы остальные отбрасывает) с 
+class Pdftojpg(View):
+    """Class View функция для отправки и сохранения PDF файлов(принимает только PDF файлы остальные отбрасывает) с 
     последующим преобразованием в JPG zip архив"""
-    if request.method == 'POST':
-        form = PdfForm(request.POST, request.FILES)
+    
+    form_class = PdfForm
+    template_name = 'pdf/pdf.html'
+    
+    def get(self, request,  *args, **kwargs):
+        context = {
+        'title': 'PDFtoJPG',
+        'form': self.form_class,
+    }
+        return render(request, self.template_name, context)
+        
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST, request.FILES)
         if request.POST['name'] != '':
             name = '(PDFtoJPG) ' + request.POST['name']
         else:
@@ -35,47 +47,41 @@ def pdftojpg(request):
             user = request.user
         if form.is_valid():
             jpgziplist = []
-            for afile in request.FILES.getlist('pdffile'):
-                if afile.content_type != 'application/pdf':
+            for file in request.FILES.getlist('pdffile'):
+                if file.content_type != 'application/pdf':
                     continue
-                file_obj = Pdf.objects.create(name=name, pdffile=afile, user = user)
-                Pdf.objects.filter(pk=file_obj.id).update(zipimgfile = pdfjpgconvert(afile))
+                file_obj = Pdf.objects.create(name=name, pdffile=file, user = user)
+                Pdf.objects.filter(pk=file_obj.id).update(zipimgfile = self.pdfjpgconvert(file))
                 url = Pdf.objects.get(pk=file_obj.id)
                 jpgziplist.append({'url' : url.zipimgfile.url,
                                    'name': str(url.pdffile).split('/')[-1]})
             context = {
                 'urls' : jpgziplist,
-                'back' : "/pdf/pdftojpg"
+                'back' : "/pdf/pdftojpg",
             }
             return render(request, 'pdf/readyfiles.html', context)
-    else:
-        form = PdfForm()
-    context = {
-        'title': 'pdf',
-        'form': form,
-    }
-    return render(request, 'pdf/pdf.html', context)
+        
+    def pdfjpgconvert(self, file):
+        """Конвертер из PDF в JPG и архивирования JPG файлов в ZIP 
+            возвращает расположение ZIP JPG файла"""
+        file.open()
+        pages = convert_from_bytes(file.read(), 500)
+        file.close()
+        i = 1
+        current_date = date.today()
+        Path(media + 'jpg/converted/' + str(current_date)).mkdir(parents=True, exist_ok=True)
+        jpgzipname = f'jpg/converted/{str(current_date)}/{uuid.uuid4()}.zip'
+        with ZipFile(media + jpgzipname, 'w') as myzip:
+            for page in pages:
+                folder = uuid.uuid4()
+                os.mkdir(media + f'pdf/temp/{folder}')
+                page.save(media + f'pdf/temp/{folder}/{i}.jpg')
+                myzip.write(media + f'pdf/temp/{folder}/{i}.jpg',arcname=f'{i}.jpg')
+                i += 1
+        shutil.rmtree(media + f'pdf/temp/{folder}')
+        myzip.close()
+        return jpgzipname   
 
-def pdfjpgconvert(file):
-    """Конвертер из PDF в JPG и архивирования JPG файлов в ZIP 
-    возвращает расположение ZIP JPG файла"""
-    file.open()
-    pages = convert_from_bytes(file.read(), 500, poppler_path='D:/django/poppler-22.04.0/Library/bin')
-    file.close()
-    i = 1
-    current_date = date.today()
-    Path(media + 'jpg/converted/' + str(current_date)).mkdir(parents=True, exist_ok=True)
-    jpgzipname = f'jpg/converted/{str(current_date)}/{uuid.uuid4()}.zip'
-    with ZipFile(media + jpgzipname, 'w') as myzip:
-        for page in pages:
-            folder = uuid.uuid4()
-            os.mkdir(media + f'pdf/temp/{folder}')
-            page.save(media + f'pdf/temp/{folder}/{i}.jpg')
-            myzip.write(media + f'pdf/temp/{folder}/{i}.jpg',arcname=f'{i}.jpg')
-            i += 1
-    shutil.rmtree(media + f'pdf/temp/{folder}')
-    myzip.close()
-    return jpgzipname
 
 def jpgtopdf(request):
     """View функция для отправки и сохранения ZIP JPG файлов с 
@@ -92,7 +98,14 @@ def jpgtopdf(request):
             user = request.user
         if form.is_valid():
             pdflist = []
+            err = 0 # маркер проверки валидности файлов
             jpgziplist = request.FILES.getlist('pdffile')
+            for afile in jpgziplist:
+                if 'image' not in afile.content_type:
+                    err += 1
+                if err == len(jpgziplist):
+                    messages.warning(request, "Неверные файлы")
+                    return HttpResponseRedirect(reverse('pdf:jpg'))
             pdf, jpg = jpgpdfconverter(jpgziplist)
             file_obj = Pdf.objects.create(name=name, pdffile=pdf, zipimgfile=jpg, user=user)
             pdflist.append({'url' : file_obj.pdffile.url,
@@ -122,7 +135,7 @@ def jpgpdfconverter(jpgrawlst):
     with ZipFile(media + jpgzipname, 'a') as myzip:
         for file in jpgrawlst:
             if 'image' not in file.content_type:
-                    continue
+                continue
             lst.append(Image.open(file).convert('RGB'))
             file.open()
             myzip.writestr(data=file.read(),zinfo_or_arcname=f'{i}.jpg')
@@ -135,9 +148,10 @@ def jpgpdfconverter(jpgrawlst):
     return pdfname, jpgzipname
 
 def pdftotextconverter(pdf,lang):
-    pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract-OCR/tesseract.exe'
+    """Конвертет из PDF в TXT, каждая страница отдельный TXT файл, с распознованием текста(Англ и Рус языки), 
+    возвращает расположение txt zip файла"""
     pdf.open()
-    pages = convert_from_bytes(pdf.read(), 500,poppler_path='D:/django/poppler-22.04.0/Library/bin')
+    pages = convert_from_bytes(pdf.read(), 500)
     pdf.close()
     current_date = date.today()
     Path(media + 'txt/' + str(current_date)).mkdir(parents=True, exist_ok=True)
@@ -190,7 +204,6 @@ def pdftotxt(request):
     }
     return render(request, 'pdf/txt.html', context)
 
-    
 
 class PDFDeleteView(SuccessMessageMixin, DeleteView):
     """Класс для штучного удаления файлов из Личного кабинета пользователя"""
@@ -199,6 +212,7 @@ class PDFDeleteView(SuccessMessageMixin, DeleteView):
     extra_context = {'title' : 'Удаление файла'}
     success_url = reverse_lazy('users:profile_pdf')
     success_message = 'Файл успешно удален'
+    
     
 def massdelete(request):
     """Функция масового удаления файлов из личного кабинета пользователя"""

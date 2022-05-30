@@ -1,6 +1,7 @@
 ﻿{% extends "main/base.html" %}
 {% block content %}
 
+{% include "main/message.html" %}
 <form action="{% url 'pdf:jpg' %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
 <div class="col-md-8 mx-auto vh-100 d-flex flex-column justify-content-center align-items-center">

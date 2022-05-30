@@ -1,4 +1,6 @@
 ﻿{% extends "main/base.html" %}
+
+{% include 'main/progress_bar.html' %}
 {% block content %}
 <form action="{% url 'pdf:pdf' %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
@@ -10,6 +12,8 @@
 </div>
     {{ form.pdffile }}
     <input class="btn btn-dark my-3" type="submit" value="MakeItEasy">
+    
 </div>
+
 </form>
 {% endblock content %}

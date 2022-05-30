@@ -145,3 +145,4 @@ INTERNAL_IPS = [
 LOGIN_URL = '/users/login/'
 
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.random_char_challenge'
+
