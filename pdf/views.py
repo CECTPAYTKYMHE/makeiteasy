@@ -156,7 +156,7 @@ class Pdftotxt(View):
     последующим преобразованием и распознованием текста в TXT zip архив"""
     form_class = TxtForm
     template_name = 'pdf/txt.html'
-
+    
     def get(self, request, *args, **kwargs):
         context = {
             'title': 'PDFtoTXT',
@@ -186,7 +186,7 @@ class Pdftotxt(View):
                                    'name': str(url.pdffile).split('/')[-1]})
             context = {
                 'urls' : jpgziplist,
-                'back' : "/pdf/pdftotxt"
+                'back' : '/pdf/pdftotxt',
             }
             return render(request, 'pdf/readyfiles.html', context)
    
