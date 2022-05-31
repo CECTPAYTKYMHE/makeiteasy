@@ -1,0 +1,32 @@
+﻿{% extends "main/base.html" %}
+{% block content %}
+
+{% include "main/message.html" %}
+<form action="{% url 'users:register' %}" method="post">
+    {% csrf_token %}
+<div class="col-md-8 mx-auto vh-100 d-flex flex-column justify-content-center align-items-center">
+<div class="form-floating mb-3">
+    {{ form.username }}
+    <label for="{{ form.username.id_for_label }}">Логин</label>
+  </div>
+  <div class="form-floating mb-3">
+    {{ form.email}}
+    <label for="{{ form.email.id_for_label }}">E-mail</label>
+  </div>
+  <div class="form-floating">
+    {{ form.password1 }}
+  <label for="{{ form.password1.id_for_label }}">Пароль</label>
+</div>
+  <div class="form-floating">
+      {{ form.password2 }}
+    <label for="{{ form.password2.id_for_label }}">Повторите пароль</label>
+  </div>
+  <div class="form my-2">
+  <label for="{{ form.captcha.id_for_label }}" class= 'my-3' ><h6>Введите символы с картинки</h6></label>
+  {{ form.captcha }}
+</div>
+  <input class="btn btn-dark my-3" type="submit" value="Зарегистрироваться">
+  <h6>Уже есть аккаунт? <a href="{% url 'users:login' %}">Войти</a></h6>
+</div>
+</form>
+{% endblock content %}
